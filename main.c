@@ -103,21 +103,6 @@ int main(void) {
     return 0;
 }
 
-// マウスコールバック関数
-void mouseHandler(int event, int x, int y, int flags, void* param) {
-    int grid_x = x / CELL_SIZE;
-    int grid_y = y / CELL_SIZE;
-
-    if (grid_x < GRID_SIZE && grid_y < GRID_SIZE) {
-        if (event == CV_EVENT_LBUTTONDOWN) {  // 左クリック: 障害物を追加
-            node[grid_y][grid_x].available = false;
-        }
-        else if (event == CV_EVENT_RBUTTONDOWN) {  // 右クリック: 障害物を削除
-            node[grid_y][grid_x].available = true;
-        }
-    }
-}
-
 // A*アルゴリズム
 void a_star() {
     Nodes* open_list[GRID_SIZE * GRID_SIZE];
@@ -177,5 +162,20 @@ void drawPath(Nodes* node) {
             cvPoint(node->parent->x * CELL_SIZE + CELL_SIZE / 2, node->parent->y * CELL_SIZE + CELL_SIZE / 2),
             cvScalar(0, 255, 0), 2, 8);
         node = node->parent;
+    }
+}
+
+// マウスコールバック関数
+void mouseHandler(int event, int x, int y, int flags, void* param) {
+    int grid_x = x / CELL_SIZE;
+    int grid_y = y / CELL_SIZE;
+
+    if (grid_x < GRID_SIZE && grid_y < GRID_SIZE) {
+        if (event == CV_EVENT_LBUTTONDOWN) {  // 左クリック: 障害物を追加
+            node[grid_y][grid_x].available = false;
+        }
+        else if (event == CV_EVENT_RBUTTONDOWN) {  // 右クリック: 障害物を削除
+            node[grid_y][grid_x].available = true;
+        }
     }
 }
