@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <math.h>
-//#include <opencv2/opencv.hpp>
-//#include <opencv/highgui.h>
+#include <opencv2/opencv.hpp>
+#include <opencv/highgui.h>
 
 // グリッドのサイズ（10x10のグリッド）とセルのサイズ（100x100ピクセル）
 #define GRID_SIZE 10
@@ -25,7 +25,7 @@ typedef struct nodes {
 } Nodes;
 
 // 画像の宣言と、ノード、スタートノード、ゴールノード、経路表示フラグの設定
-//IplImage* img;  画像データの格納先
+IplImage* img;  画像データの格納先
 Nodes node[GRID_SIZE][GRID_SIZE];  // グリッド（2D配列）のノード
 Nodes* start_node;  // スタートノードのポインタ
 Nodes* goal_node;   // ゴールノードのポインタ
@@ -37,14 +37,24 @@ int heuristic(Nodes* a, Nodes* b) {//ヒューリスティックを返す関数
     return heuristic;
 }
 
-void Setcost(Nodes* a, int cost, int heuristic) {//ノードのコストを設定する
+void Setcost(Nodes* a, int cost, int heuristic) {//ノードのコストを設定する関数
     a->cost = cost;
     a->heuristic = heuristic;
     a->total_cost = cost + heuristic;
     return;
 }
 
-void A_star(Nodes* noode,Nodes* start_node,Nodes* goal_node){
+void A_star(){
+
+    for (int i = 0; i < GRID_SIZE; i++) {
+        for (int j = 0; j < GRID_SIZE; j++) {
+            node[i][j].x = j;
+            node[i][j].y = i;
+            node[i][j].available = true;
+            node[i][j].parent = NULL;
+        }
+    }
+
     Nodes* open_nodes[GRID_SIZE * GRID_SIZE];
     //Nodes* close_nodes[GRID_SIZE * GRID_SIZE];
     Nodes* current_node = start_node;//現在のノードをスタートノードで初期化
@@ -68,11 +78,14 @@ void A_star(Nodes* noode,Nodes* start_node,Nodes* goal_node){
             }
         }
 
+        Nodes* next_node = open_nodes[mincost_node_index];//最小コストのノードを次に移動するノードとする
 
         //close_nodes[close_number] = current_node;//現在のノードをクローズリストに追加
         current_node->passed = true;//通行済みにする
-        open_nodes[mincost_node_index]->parent = current_node;//移動先のノードの親ノードを現在のノードに設定
-        current_node = open_nodes[mincost_node_index];//現在のノードを移動先のノードに更新
+        open_nodes[mincost_node_index] = open_nodes[open_number - 1];//最小コストノードをオープンリストから削除(リストの最後尾のノードで上書きして"強引に","実質的"な削除をしている)
+        open_number--;//通過したノードはもう探索しないので、open_numberをひとつ減らす
+        next_node->parent = current_node;//移動先のノードの親ノードを現在のノードに設定
+        current_node = next_node;//現在のノードを移動先のノードに更新
 
 
         if (current_node == goal_node)return;//この時点でゴールノードに到達しているなら探索を終了する
@@ -80,26 +93,27 @@ void A_star(Nodes* noode,Nodes* start_node,Nodes* goal_node){
         int new_cost = current_node->cost + 1;
 
         Nodes* neighbors[4] = {&node[current_node->x - 1][current_node->y], &node[current_node->x + 1][current_node->y], &node[current_node->x][current_node->y + 1], &node[current_node->x][current_node->y - 1] };
+        //隣接するノードの配列。先頭から順番に左、右、上、下のノード
 
-        if (current_node->x < 10 && neighbors[0]->passed) {//現在のノードが左端にないなら
+        if (current_node->x < 10 && !neighbors[0]->passed) {//現在のノードが左端にない、かつ次のノードが未通行なら
             open_nodes[open_number] = neighbors[0];//現在のノードから一つ左のノードをオープンリストに追加
             Setcost(open_nodes[open_number], new_cost, heuristic(open_nodes[open_number], goal_node));
             open_number++;
         }
 
-        if (current_node->x > 0 && neighbors[1]->passed) {//現在のノードが右端にないなら
+        if (current_node->x > 0 && !neighbors[1]->passed) {//現在のノードが右端にない、かつ次のノードが未通行なら
             open_nodes[open_number] = neighbors[1];//右
             Setcost(open_nodes[open_number], new_cost, heuristic(open_nodes[open_number], goal_node));
             open_number++;
         }
 
-        if (current_node->y < 10 && neighbors[2]->passed) {//現在のノードが上端にないなら
+        if (current_node->y < 10 && !neighbors[2]->passed) {//現在のノードが上端にない、かつ次のノードが未通行なら
             open_nodes[open_number] = neighbors[2];//上
             Setcost(open_nodes[open_number], new_cost, heuristic(open_nodes[open_number], goal_node));
             open_number++;
         }
 
-        if (current_node->y > 0 && neighbors[3]->passed) {//現在のノードが下端にないなら
+        if (current_node->y > 0 && !neighbors[3]->passed) {//現在のノードが下端にない、かつ次のノードが未通行なら
             open_nodes[open_number] = neighbors[3];//下
             Setcost(open_nodes[open_number], new_cost, heuristic(open_nodes[open_number], goal_node));
             open_number++;
