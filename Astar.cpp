@@ -84,7 +84,7 @@ void A_star(){
         current_node->passed = true;//通行済みにする
         open_nodes[mincost_node_index] = open_nodes[open_number - 1];//最小コストノードをオープンリストから削除(リストの最後尾のノードで上書きして"強引に","実質的"な削除をしている)
         open_number--;//通過したノードはもう探索しないので、open_numberをひとつ減らす
-        next_node->parent = current_node;//移動先のノードの親ノードを現在のノードに設定
+        //next_node->parent = current_node;//移動先のノードの親ノードを現在のノードに設定
         current_node = next_node;//現在のノードを移動先のノードに更新
 
 
@@ -98,24 +98,28 @@ void A_star(){
         if (current_node->x < 10 && !neighbors[0]->passed) {//現在のノードが左端にない、かつ次のノードが未通行なら
             open_nodes[open_number] = neighbors[0];//現在のノードから一つ左のノードをオープンリストに追加
             Setcost(open_nodes[open_number], new_cost, heuristic(open_nodes[open_number], goal_node));
+            open_nodes[open_number]->parent = current_node;//オープンしたノードの親ノードを現在のノードにする
             open_number++;
         }
 
         if (current_node->x > 0 && !neighbors[1]->passed) {//現在のノードが右端にない、かつ次のノードが未通行なら
             open_nodes[open_number] = neighbors[1];//右
             Setcost(open_nodes[open_number], new_cost, heuristic(open_nodes[open_number], goal_node));
+            open_nodes[open_number]->parent = current_node;
             open_number++;
         }
 
         if (current_node->y < 10 && !neighbors[2]->passed) {//現在のノードが上端にない、かつ次のノードが未通行なら
             open_nodes[open_number] = neighbors[2];//上
             Setcost(open_nodes[open_number], new_cost, heuristic(open_nodes[open_number], goal_node));
+            open_nodes[open_number]->parent = current_node;
             open_number++;
         }
 
         if (current_node->y > 0 && !neighbors[3]->passed) {//現在のノードが下端にない、かつ次のノードが未通行なら
             open_nodes[open_number] = neighbors[3];//下
             Setcost(open_nodes[open_number], new_cost, heuristic(open_nodes[open_number], goal_node));
+            open_nodes[open_number]->parent = current_node;
             open_number++;
         }
     }    
