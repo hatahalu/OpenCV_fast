@@ -1,37 +1,41 @@
-#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS // Visual Studioでのセキュリティ警告を無効化
 
-#include <stdio.h>
-#include <stdbool.h>
-#include <math.h>
-#include <opencv2/opencv.hpp>
-#include <opencv/highgui.h>
+#include <stdio.h> // 標準ライブラリ
+#include <stdbool.h> // 真偽値（bool型）を扱うためのライブラリ
+#include <math.h> // 数学関数（absなど）を扱うためのライブラリ
+#include <opencv2/opencv.hpp> // OpenCVの主要な機能を扱うヘッダーファイル
+#include <opencv/highgui.h> // OpenCVで画像表示やGUI操作を行うためのヘッダーファイル
 
-#define GRID_SIZE 10
-#define CELL_SIZE 100
-#define WIDTH (GRID_SIZE * CELL_SIZE)
-#define HEIGHT (GRID_SIZE * CELL_SIZE)
+// 定数を定義
+#define GRID_SIZE 10 // グリッドの縦横のサイズ（10x10のグリッド）
+#define CELL_SIZE 100 // 各セルのピクセルサイズ
+#define WIDTH (GRID_SIZE * CELL_SIZE) // 画像の横幅（セルサイズ × グリッド数）
+#define HEIGHT (GRID_SIZE * CELL_SIZE) // 画像の縦幅（セルサイズ × グリッド数）
 
+// ノード（セル）の情報を表す構造体
 typedef struct nodes {
-    int cost;
-    int heuristic;
-    int total_cost;
-    bool available;
-    bool passed;
-    int x, y;
-    struct nodes* parent;
+    int cost; // スタートノードから現在ノードまでの移動コスト
+    int heuristic; // ヒューリスティック値（ゴールまでの推定コスト）
+    int total_cost; // 合計コスト（cost + heuristic）
+    bool available; // 通行可能かどうか（true: 通行可能, false: 障害物）
+    bool passed; // 探索済みかどうか（true: 探索済み, false: 未探索）
+    int x, y; // ノードのグリッド座標（x, y）
+    struct nodes* parent; // 親ノード（経路の探索でこのノードに至る直前のノード）
 } Nodes;
 
-IplImage* img;
-Nodes node[GRID_SIZE][GRID_SIZE];
-Nodes* start_node;
-Nodes* goal_node;
+// グローバル変数
+IplImage* img; // 画像データを保持する変数（OpenCV用）
+Nodes node[GRID_SIZE][GRID_SIZE]; // グリッド上のノード（10x10のノード）　
+Nodes* start_node; // スタートノード
+Nodes* goal_node; // ゴールノード
 
+// 関数のプロトタイプ宣言
+int heuristic(Nodes a, Nodes b); // ヒューリスティック値を計算する関数
+void Setcost(Nodes* a, int cost, int heuristic); // ノードのコストを設定する関数
+void mouseHandler(int event, int x, int y, int flags, void* param); // マウスクリック時の処理を定義する関数
+void a_star(Nodes* start_node, Nodes* goal_node); // A*アルゴリズムを実行する関数
+void drawPath(Nodes* node); // ゴールからスタートノードまでの経路を描画する関数
 
-int heuristic(Nodes a, Nodes b);
-void Setcost(Nodes* a, int cost, int heuristic);
-void mouseHandler(int event, int x, int y, int flags, void* param);
-void a_star(Nodes* start_node, Nodes* goal_node);
-void drawPath(Nodes* node);
 
 
 int main(void) {
