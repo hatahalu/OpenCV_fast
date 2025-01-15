@@ -26,7 +26,6 @@ Nodes node[GRID_SIZE][GRID_SIZE];
 Nodes* start_node;
 Nodes* goal_node;
 
-bool show_path = false;  // 経路表示フラグ
 
 int heuristic(Nodes a, Nodes b);
 void Setcost(Nodes* a, int cost, int heuristic);
@@ -101,13 +100,9 @@ int main(void) {
             }
             // A*アルゴリズムを実行して経路を探索
             a_star(start_node, goal_node);
-            // 経路表示フラグを有効化
-            show_path = true;
         }
         // 経路を描画
-        if (show_path) {
-            drawPath(goal_node); // 経路が見つかった場合に経路を描画
-        }
+        drawPath(goal_node); // 経路が見つかった場合に経路を描画
         // ウィンドウに画像を表示
         cvShowImage("A* Pathfinding", img);
     }
