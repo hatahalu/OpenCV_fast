@@ -36,32 +36,38 @@ void drawPath(Nodes* node);
 
 
 int main(void) {
+    // 画像の生成（グリッドサイズに基づいて画像を作成）
     img = cvCreateImage(cvSize(WIDTH, HEIGHT), IPL_DEPTH_8U, 3);
+    // ウィンドウを作成して名前を付ける
     cvNamedWindow("A* Pathfinding");
+    // マウスコールバック関数を設定（マウスイベントに応答する）
     cvSetMouseCallback("A* Pathfinding", mouseHandler, NULL);
 
-    // ノードの初期化
+    // ノードの初期化ループ
     for (int i = 0; i < GRID_SIZE; i++) {
         for (int j = 0; j < GRID_SIZE; j++) {
+            // 各ノードの位置を設定
             node[i][j].x = j;
             node[i][j].y = i;
+            // 初期状態ではすべてのノードが通行可能
             node[i][j].available = true;
+            // 初期状態ではすべてのノードが未探索
             node[i][j].passed = false;
+            // 親ノードをNULLに設定
             node[i][j].parent = NULL;
         }
     }
+    // スタートノードを左上隅に設定
     start_node = &node[0][0];
+    // ゴールノードを右下隅に設定
     goal_node = &node[GRID_SIZE - 1][GRID_SIZE - 1];
 
-    // フォント設定
-    CvFont font;
-    cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0, 0, 2, 8);
-
     int key = 0;
-    while (key != 27) {  // ESCキーで終了
-        cvSet(img, cvScalar(255, 255, 255));  // 背景を白色に設定
+    while (key != 27) { // ESCキーが押されるまでループ
+        // 背景を白色に設定
+        cvSet(img, cvScalar(255, 255, 255));
 
-        // グリッド線を描画 (黒色)
+        // グリッド線を描画（黒線で描画）
         for (int i = 0; i <= GRID_SIZE; i++) {
             cvLine(img, cvPoint(0, i * CELL_SIZE), cvPoint(WIDTH, i * CELL_SIZE), cvScalar(0, 0, 0), 1);
             cvLine(img, cvPoint(i * CELL_SIZE, 0), cvPoint(i * CELL_SIZE, HEIGHT), cvScalar(0, 0, 0), 1);
@@ -70,7 +76,7 @@ int main(void) {
         // 障害物を描画
         for (int i = 0; i < GRID_SIZE; i++) {
             for (int j = 0; j < GRID_SIZE; j++) {
-                if (!node[i][j].available) {
+                if (!node[i][j].available) { // 障害物の場合
                     cvRectangle(img,
                         cvPoint(j * CELL_SIZE, i * CELL_SIZE),
                         cvPoint((j + 1) * CELL_SIZE, (i + 1) * CELL_SIZE),
@@ -79,32 +85,37 @@ int main(void) {
             }
         }
 
-        // スタートとゴールの文字を描画
+        // スタートノードとゴールノードのマークを描画（緑色の円）
         cvCircle(img, cvPoint(50, 50), 50, cvScalar(0, 255, 0), -1);
         cvCircle(img, cvPoint(WIDTH - 50, HEIGHT - 50), 50, cvScalar(0, 255, 0), -1);
 
         // 経路を描画
         if (show_path) {
-            drawPath(goal_node);
+            drawPath(goal_node); // 経路が見つかった場合に経路を描画
         }
 
+        // ウィンドウに画像を表示
         cvShowImage("A* Pathfinding", img);
 
-        key = cvWaitKey(10);
-        if (key == 13) {  // Enterキー
+        key = cvWaitKey(10); // キー入力を待機
+        if (key == 13) { // Enterキーが押された場合
+            // ノードの初期化（経路再探索の準備）
             for (int i = 0; i < GRID_SIZE; i++) {
                 for (int j = 0; j < GRID_SIZE; j++) {
-                    node[i][j].parent = NULL;
+                    node[i][j].parent = NULL; // 親ノードをクリア
                 }
             }
+            // A*アルゴリズムを実行して経路を探索
             a_star(start_node, goal_node);
+            // 経路表示フラグを有効化
             show_path = true;
         }
     }
 
+    // リソースを解放
     cvReleaseImage(&img);
     cvDestroyWindow("A* Pathfinding");
-    return 0;
+    return 0; // プログラム終了
 }
 
 int heuristic(Nodes a, Nodes b) {//ヒューリスティックを返す関数
@@ -205,31 +216,34 @@ void a_star(Nodes* start_node, Nodes* goal_node) {
 
 }
 
-
-// 経路を描画
 void drawPath(Nodes* node) {
+    // ゴールノードから親ノードをたどって経路を描画
     while (node->parent != NULL) {
         cvLine(img,
-            cvPoint(node->x * CELL_SIZE + CELL_SIZE / 2, node->y * CELL_SIZE + CELL_SIZE / 2),
-            cvPoint(node->parent->x * CELL_SIZE + CELL_SIZE / 2, node->parent->y * CELL_SIZE + CELL_SIZE / 2),
-            cvScalar(0, 255, 0), 2, 8);
-        node = node->parent;
+            cvPoint(node->x * CELL_SIZE + CELL_SIZE / 2, node->y * CELL_SIZE + CELL_SIZE / 2), // 現在ノードの中心
+            cvPoint(node->parent->x * CELL_SIZE + CELL_SIZE / 2, node->parent->y * CELL_SIZE + CELL_SIZE / 2), // 親ノードの中心
+            cvScalar(0, 255, 0), 2, 8); // 緑色の線を描画
+        node = node->parent; // 次のノード（親ノード）に進む
     }
 }
 
-// マウスコールバック関数
 void mouseHandler(int event, int x, int y, int flags, void* param) {
+    // マウスクリック位置のグリッド座標を計算
     int grid_x = x / CELL_SIZE;
     int grid_y = y / CELL_SIZE;
 
+    // グリッド範囲内でクリックされた場合にのみ処理を実行
     if (grid_x < GRID_SIZE && grid_y < GRID_SIZE) {
-        if (event == CV_EVENT_LBUTTONDOWN) {  // 左クリック: 障害物を追加
-            node[grid_y][grid_x].available = false;
+        if (event == CV_EVENT_LBUTTONDOWN) { // 左クリックの場合
+            node[grid_y][grid_x].available = false; // 障害物を追加（通行不可に設定）
         }
-        else if (event == CV_EVENT_RBUTTONDOWN) {  // 右クリック: 障害物を削除
-            node[grid_y][grid_x].available = true;
+        else if (event == CV_EVENT_RBUTTONDOWN) { // 右クリックの場合
+            node[grid_y][grid_x].available = true; // 障害物を削除（通行可能に設定）
         }
     }
 }
-        
-    
+
+
+
+
+
