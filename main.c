@@ -60,18 +60,15 @@ int main(void) {
     start_node = &node[0][0];
     // ゴールノードをwindowの右下に設定（&node[GRID_SIZE][GRID_SIZE]だと存在しないマスがgoal_nodeになってしまうので-1)
     goal_node = &node[GRID_SIZE - 1][GRID_SIZE - 1];
-
     int key = 0;
     while (key != 27) { // ESCキーが押されるまでループする
         // 背景を白色に設定
         cvSet(img, cvScalar(255, 255, 255));
-
         // グリッド線を黒線で描画
         for (int i = 0; i <= GRID_SIZE; i++) {
             cvLine(img, cvPoint(0, i * CELL_SIZE), cvPoint(WIDTH, i * CELL_SIZE), cvScalar(0, 0, 0), 1);
             cvLine(img, cvPoint(i * CELL_SIZE, 0), cvPoint(i * CELL_SIZE, HEIGHT), cvScalar(0, 0, 0), 1);
         }
-
         // 障害物を描画する
         for (int i = 0; i < GRID_SIZE; i++) {
             for (int j = 0; j < GRID_SIZE; j++) {
@@ -83,11 +80,9 @@ int main(void) {
                 }
             }
         }
-
         // スタートノードとゴールノードの緑色の円を描画
         cvCircle(img, cvPoint(50, 50), 50, cvScalar(0, 255, 0), -1); //スタートノード
         cvCircle(img, cvPoint(WIDTH - 50, HEIGHT - 50), 50, cvScalar(0, 255, 0), -1);//ゴールノード
-
         key = cvWaitKey(10); // キー入力を10ミリ秒待機する
         if (key == 13) { // Enterキーが押された場合(13はenterキーのASCIIコード）
             // 今までのノードを初期化する
@@ -105,7 +100,6 @@ int main(void) {
         // ウィンドウに画像を表示する
         cvShowImage("A*", img);
     }
-
     // リソースを解放
     cvReleaseImage(&img);
     cvDestroyWindow("A*");
@@ -229,7 +223,6 @@ void mouseHandler(int event, int x, int y, int flags, void* param) {
     // マウスクリック位置のグリッド座標を計算
     int grid_x = x / CELL_SIZE; //xが1だと、1/100=0.01となるがintに変換するのでgrid_xは0になる。
     int grid_y = y / CELL_SIZE; 
-
     // グリッド範囲内でクリックされた場合にのみ処理を実行
     if (grid_x < GRID_SIZE && grid_y < GRID_SIZE) {
         if (event == CV_EVENT_LBUTTONDOWN) { // 左クリックの場合
