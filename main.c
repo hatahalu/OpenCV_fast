@@ -103,6 +103,7 @@ int main(void) {
             for (int i = 0; i < GRID_SIZE; i++) {
                 for (int j = 0; j < GRID_SIZE; j++) {
                     node[i][j].parent = NULL; // 親ノードをクリア
+                    node[i][j].passed = false; // 探索済みフラグをリセット
                 }
             }
             // A*アルゴリズムを実行して経路を探索
@@ -242,8 +243,3 @@ void mouseHandler(int event, int x, int y, int flags, void* param) {
         }
     }
 }
-
-
-
-
-
