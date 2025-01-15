@@ -89,13 +89,6 @@ int main(void) {
         cvCircle(img, cvPoint(50, 50), 50, cvScalar(0, 255, 0), -1);
         cvCircle(img, cvPoint(WIDTH - 50, HEIGHT - 50), 50, cvScalar(0, 255, 0), -1);
 
-        // 経路を描画
-        if (show_path) {
-            drawPath(goal_node); // 経路が見つかった場合に経路を描画
-        }
-
-        // ウィンドウに画像を表示
-        cvShowImage("A* Pathfinding", img);
 
         key = cvWaitKey(10); // キー入力を待機
         if (key == 13) { // Enterキーが押された場合
@@ -111,6 +104,12 @@ int main(void) {
             // 経路表示フラグを有効化
             show_path = true;
         }
+        // 経路を描画
+        if (show_path) {
+            drawPath(goal_node); // 経路が見つかった場合に経路を描画
+        }
+        // ウィンドウに画像を表示
+        cvShowImage("A* Pathfinding", img);
     }
 
     // リソースを解放
